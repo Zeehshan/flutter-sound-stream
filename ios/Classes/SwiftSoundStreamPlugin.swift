@@ -195,26 +195,30 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
     private func resetEngineForRecord() {
         mAudioEngine.inputNode.removeTap(onBus: mRecordBus)
         let input = mAudioEngine.inputNode
-        let inputFormat = input.outputFormat(forBus: mRecordBus)
-        let converter = AVAudioConverter(from: inputFormat, to: mRecordFormat!)!
-        let ratio: Float = Float(inputFormat.sampleRate)/Float(mRecordFormat.sampleRate)
+
+        let hardwareSampleRate = AVAudioSession.sharedInstance().sampleRate
+        let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: hardwareSampleRate, channels: 1, interleaved: false)!
+
+        let converter = AVAudioConverter(from: inputFormat, to: AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: mRecordSampleRate, channels: 1, interleaved: false)!)
         
         input.installTap(onBus: mRecordBus, bufferSize: mRecordBufferSize, format: inputFormat) { (buffer, time) -> Void in
-            let inputCallback: AVAudioConverterInputBlock = { inNumPackets, outStatus in
+            let inputBlock: AVAudioConverterInputBlock = { inNumPackets, outStatus in
                 outStatus.pointee = .haveData
                 return buffer
             }
-            
-            let convertedBuffer = AVAudioPCMBuffer(pcmFormat: self.mRecordFormat!, frameCapacity: UInt32(Float(buffer.frameCapacity) / ratio))!
-            
-            var error: NSError?
-            let status = converter.convert(to: convertedBuffer, error: &error, withInputFrom: inputCallback)
-            assert(status != .error)
-            
-            if (self.mRecordFormat?.commonFormat == AVAudioCommonFormat.pcmFormatInt16) {
-                let values = self.audioBufferToBytes(convertedBuffer)
-                self.sendMicData(values)
+
+             let pcmBuffer = AVAudioPCMBuffer(pcmFormat: converter!.outputFormat, frameCapacity: UInt32(Double(buffer.frameLength) * self.mRecordSampleRate / hardwareSampleRate))!
+
+             var error: NSError?
+            converter?.convert(to: pcmBuffer, error: &error, withInputFrom: inputBlock)
+        
+             if let error = error {
+                print("Error during conversion: \(error.localizedDescription)")
+                return
             }
+
+            let values = self.audioBufferToBytes(pcmBuffer)
+            self.sendMicData(values)
         }
     }
     
