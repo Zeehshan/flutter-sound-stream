@@ -197,9 +197,9 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
         let input = mAudioEngine.inputNode
 
         let hardwareSampleRate = AVAudioSession.sharedInstance().sampleRate
-        let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: hardwareSampleRate, channels: 1, interleaved: false)!
+        let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: hardwareSampleRate, channels: 1, interleaved: true)!
 
-        let converter = AVAudioConverter(from: inputFormat, to: AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: mRecordSampleRate, channels: 1, interleaved: false)!)
+        let converter = AVAudioConverter(from: inputFormat, to: AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: mRecordSampleRate, channels: 1, interleaved: true)!)
         
         input.installTap(onBus: mRecordBus, bufferSize: mRecordBufferSize, format: inputFormat) { (buffer, time) -> Void in
             let inputBlock: AVAudioConverterInputBlock = { inNumPackets, outStatus in
