@@ -49,6 +49,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     _audioStream = _recorder.audioStream.listen((data) {
+      print(data);
       if (_isPlaying) {
         _player.writeChunk(data);
       } else {

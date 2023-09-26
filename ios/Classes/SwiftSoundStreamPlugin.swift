@@ -445,13 +445,13 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
     private func bytesToAudioBuffer(_ buf: [UInt8]) -> AVAudioPCMBuffer {
         let frameLength = UInt32(buf.count) / mPlayerInputFormat.streamDescription.pointee.mBytesPerFrame
         
-        let audioBuffer = AVAudioPCMBuffer(pcmFormat: mPlayerInputFormat, frameCapacity: frameLength)?
+        let audioBuffer = AVAudioPCMBuffer(pcmFormat: mPlayerInputFormat, frameCapacity: frameLength)!
         audioBuffer.frameLength = frameLength
         
-        let dstLeft = audioBuffer.int16ChannelData?[0]
+        let dstLeft = audioBuffer.int16ChannelData![0]
         
         buf.withUnsafeBufferPointer {
-            let src = UnsafeRawPointer($0.baseAddress?).bindMemory(to: Int16.self, capacity: Int(frameLength))
+            let src = UnsafeRawPointer($0.baseAddress!).bindMemory(to: Int16.self, capacity: Int(frameLength))
             dstLeft.initialize(from: src, count: Int(frameLength))
         }
         
