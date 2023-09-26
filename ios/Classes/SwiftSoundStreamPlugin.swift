@@ -178,7 +178,7 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
         }
         mRecordSampleRate = argsArr["sampleRate"] as? Double ?? mRecordSampleRate
         debugLogging = argsArr["showLogs"] as? Bool ?? debugLogging
-        mRecordFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt16, sampleRate: mRecordSampleRate, channels: 1, interleaved: true)
+        mRecordFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32, sampleRate: mRecordSampleRate, channels: 1, interleaved: true)
         
         checkAndRequestPermission { isGranted in
             if isGranted {
@@ -197,9 +197,9 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
         let input = mAudioEngine.inputNode
 
         let hardwareSampleRate = AVAudioSession.sharedInstance().sampleRate
-        let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: hardwareSampleRate, channels: 1, interleaved: true)!
+        let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: hardwareSampleRate, channels: 1, interleaved: false)!
 
-        let converter = AVAudioConverter(from: inputFormat, to: AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: mRecordSampleRate, channels: 1, interleaved: true)!)
+        let converter = AVAudioConverter(from: inputFormat, to: AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: mRecordSampleRate, channels: 1, interleaved: false)!)
         
         input.installTap(onBus: mRecordBus, bufferSize: mRecordBufferSize, format: inputFormat) { (buffer, time) -> Void in
             let inputBlock: AVAudioConverterInputBlock = { inNumPackets, outStatus in
@@ -255,7 +255,7 @@ public class SwiftSoundStreamPlugin: NSObject, FlutterPlugin {
         }
         mPlayerSampleRate = argsArr["sampleRate"] as? Double ?? mPlayerSampleRate
         debugLogging = argsArr["showLogs"] as? Bool ?? debugLogging
-        mPlayerInputFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt16, sampleRate: mPlayerSampleRate, channels: 1, interleaved: true)
+        mPlayerInputFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32, sampleRate: mPlayerSampleRate, channels: 1, interleaved: true)
         sendPlayerStatus(SoundStreamStatus.Initialized)
     }
     
